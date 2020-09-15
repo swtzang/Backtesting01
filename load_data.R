@@ -2,7 +2,7 @@
 rm(list = ls())
 library('quantstrat')
 library('quantmod')
-#
+# Sys.setenv(TZ = 'Asia/Taipei')
 Sys.setenv(TZ = "UTC")
 currency('USD')
 init_date <- "2007-12-31"
