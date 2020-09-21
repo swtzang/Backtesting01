@@ -310,7 +310,8 @@ updateEndEq(account.st)
 
 # Get the tradeStats for your portfolio
 tstats <- tradeStats(Portfolios = portfolio.st)
-
+#  t(tstats)
+tstats
 # Print the profit factor
 # The profit factor is how many dollars you make for each dollar you lose. 
 # A profit factor above 1 means your strategy is profitable. 
@@ -319,8 +320,31 @@ tstats$Profit.Factor
 names(tstats)
 # The percent positive statistic lets us know how many of our trades were winners.
 tstats$Percent.Positive
-
+# Get transaction data
+getTxns(Portfolio = strategy.st,Symbol="SPY")
+# Get order book
+ob <- getOrderBook(strategy.st)
+class(ob)
+names(ob)
+names(ob$firststrat$SPY)
+ob$firststrat$SPY[, 1:5]
+ob$firststrat$SPY[, 6:11]
+# Per-trade statistics
+perTradeStats(strategy.st)
+a <- getAccount(strategy.st)
+last(a$summary, 5)
+head(a$summary)
 #
+library(lattice)
+xyplot(a$summary, type = 'h', col = 4)
+#
+equity <- a$summary$End.Eq
+head(equity)
+tail(equity)
+plot(equity, main = 'firststrat')
+ret <- Return.calculate(equity, method = 'log')
+charts.PerformanceSummary(ret, colorset = bluefocus,
+                          main = 'firstrat')
 # Use chart.Posn to view your system's performance on SPY
 chart.Posn(Portfolio = portfolio.st, Symbol = "SPY")
 #
@@ -358,3 +382,11 @@ instrets <- PortfReturns(portfolio.st)
 
 # Compute Sharpe ratio from returns
 SharpeRatio.annualized(instrets, geometric = FALSE)
+
+#
+
+
+
+
+
+
