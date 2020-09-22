@@ -101,6 +101,8 @@ getTxns(Portfolio=qs.strategy,Symbol="SPY")
 # applyStrategy. It is a time series object which contains the historic price
 # data as well as the calculated indicators, signals, and rules:
 mktdata['2002']
+# mktdata.df <- data.frame(date=index(mktdata), coredata(mktdata)) 
+# write.csv(mktdata.df, 'mktdata.csv')
 # Inspecting mktdata can be very helpful in understanding strategy
 # processing and debugging
 updatePortf(qs.strategy)
@@ -131,9 +133,10 @@ ob$qsFaber$SPY[, 1:5]
 ob$qsFaber$SPY[, 6:11]
 #
 perTradeStats(qs.strategy)
+# out <- perTradeStats(qs.strategy)
+# write.csv(out, 'perTradeStats.csv')
 
-
-#quantstrat includes the capability to generate maximum adverse excursion
+# quantstrat includes the capability to generate maximum adverse excursion
 # (MAE) and maximum favorable excursion (MFE) charts.
 chart.ME(Portfolio=qs.strategy, Symbol='SPY', type='MAE', scale='percent')
 #

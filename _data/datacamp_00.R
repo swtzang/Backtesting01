@@ -311,7 +311,7 @@ updateEndEq(account.st)
 # Get the tradeStats for your portfolio
 tstats <- tradeStats(Portfolios = portfolio.st)
 #  t(tstats)
-tstats
+t(tstats)
 # Print the profit factor
 # The profit factor is how many dollars you make for each dollar you lose. 
 # A profit factor above 1 means your strategy is profitable. 
@@ -329,8 +329,15 @@ names(ob)
 names(ob$firststrat$SPY)
 ob$firststrat$SPY[, 1:5]
 ob$firststrat$SPY[, 6:11]
+ob.out <- data.frame(date = index(ob$firststrat$SPY), 
+                     coredata(ob$firststrat$SPY))
+write.csv(ob.out, "ob_first_st.csv")
 # Per-trade statistics
 perTradeStats(strategy.st)
+# out <- perTradeStats(strategy.st)
+# write.csv(out, 'perTradeStats_first_st.csv')
+# mktdata.df <- data.frame(date=index(mktdata), coredata(mktdata)) 
+# write.csv(mktdata.df, 'mktdata_first_st.csv')
 a <- getAccount(strategy.st)
 last(a$summary, 5)
 head(a$summary)
