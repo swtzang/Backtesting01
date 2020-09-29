@@ -281,6 +281,11 @@ for(symbol in symbols) {
 tstats <- tradeStats(portfolio.st)
 t(tstats) #transpose tstats
 
+out <- perTradeStats(portfolio.st)
+t(out)
+# out <- perTradeStats(qs.strategy)
+# write.csv(out, 'perTradeStats.csv')
+
 # Then we can evaluate the performance using PerfomanceAnalytics package to 
 # see how is the return of the trading strategy.
 
@@ -300,3 +305,136 @@ tab <- table.Arbitrary(rets,
 tab
 #
 charts.PerformanceSummary(rets, colorset = bluefocus)
+
+# Get some warnings in this case
+# ---- Buy and hold strategy ----
+getSymbols("SPY", src = 'yahoo', from=from, to=to, adjust = T)
+# getSymbols('SPY', src = 'yahoo', from = '2000-01-01', to = '2018-12-31', auto.assign = F)
+# Step 1: Initialization ----
+rm.strat("buyHold")
+
+#Initial Setup
+initPortf("buyHold", "SPY", initDate = initDate)
+initAcct("buyHold", portfolios = "buyHold",
+         initDate = initDate, initEq = initEq)
+# 
+FirstDate <- first(time(SPY))
+# Enter order on the first date
+BuyDate <- FirstDate
+equity = getEndEq("buyHold", FirstDate)
+FirstPrice <- as.numeric(Cl(SPY[BuyDate,]))
+UnitSize = as.numeric(trunc(equity/FirstPrice))
+#
+addTxn(Portfolio = "buyHold", 
+       Symbol = "SPY", 
+       TxnDate = BuyDate, 
+       TxnPrice = FirstPrice,
+       TxnQty = UnitSize, 
+       TxnFees = 0)
+
+# We first add the transaction to sell at the end:
+LastDate <- last(time(SPY))
+# Exit order on the Last Date
+LastPrice <- as.numeric(Cl(SPY[LastDate,]))
+addTxn("buyHold", Symbol = "SPY", 
+       TxnDate = LastDate, TxnPrice = LastPrice,
+       TxnQty = -UnitSize , TxnFees = 0)
+
+updatePortf(Portfolio = "buyHold")
+
+updateAcct(name = "buyHold")
+
+updateEndEq(Account = "buyHold")
+
+chart.Posn("buyHold", Symbol = "SPY")
+# Compare strategy and market
+rets <- PortfReturns(Account = account.st)
+rets.bh <- PortfReturns(Account = "buyHold")
+returns <- cbind(rets, rets.bh)
+charts.PerformanceSummary(
+  returns, geometric = FALSE,
+  wealth.index = TRUE, 
+  main = "Strategy vs. Market")
+#------------------------------------------------
+# SMA rule ----
+# Buy every day when SMA30 SMA200
+# Sell everything (all positions) when SMA30 SMA200
+options("getSymbols.warning4.0"=FALSE)
+from ="2012-01-01"
+to ="2012-12-31"
+symbols = c("IBM","MSFT")
+getSymbols(symbols, from=from, to=to, adjust=TRUE)
+# initialize setup
+currency("USD")
+strategy.st <- portfolio.st <- account.st <- "SMA"
+rm.strat(strategy.st)
+
+initPortf(portfolio.st, symbols)
+initAcct(account.st, portfolios=portfolio.st, 
+         initEq = initEq)
+initOrders(portfolio.st)
+strategy(strategy.st, store=TRUE)
+
+# Indicator ----
+add.indicator(strategy.st, name="SMA",
+              arguments=list(x=quote(Cl(mktdata)), n=30),
+              label="sma30")
+
+add.indicator(strategy.st, name="SMA",
+              arguments=list(x=quote(Cl(mktdata)), n=200),
+              label="sma200")
+
+# Signals
+# Bull market if SMA30>SMA200
+add.signal(strategy.st, 
+           name="sigComparison",
+           arguments=list(columns=c("sma30","sma200"),
+                 relationship="gt"),
+           label="buy")
+
+# Sell market if SMA30<SMA200
+add.signal(strategy.st, 
+           name="sigComparison",
+           arguments=list(columns=c("sma30","sma200"), 
+                relationship="lt"), 
+           label="sell")
+# Rules ----
+# Buy Rule
+add.rule(strategy.st, 
+         name='ruleSignal', 
+         arguments = list(sigcol="buy", 
+                          sigval=TRUE,  
+                          orderqty=1000, 
+                          ordertype='market', 
+                          orderside='long', 
+                          pricemethod='market', 
+                          replace=FALSE), 
+         type='enter', 
+         path.dep=TRUE)
+
+# Sell Rule
+add.rule(strategy.st, 
+         name='ruleSignal', 
+         arguments = list(sigcol="sell", 
+                          sigval=TRUE,  
+                          orderqty='all', 
+                          ordertype='market', 
+                          orderside='long', 
+                          pricemethod='market', 
+                          replace=FALSE), 
+         type='exit', 
+         path.dep=TRUE) 
+# Evaluation
+out<-try(applyStrategy(strategy.st, 
+                       portfolios=portfolio.st))
+# update portfolio
+updatePortf(portfolio.st)
+updateAcct(portfolio.st)
+updateEndEq(account.st)
+#
+for(symbol in symbols) {
+  chart.Posn(Portfolio=portfolio.st,
+             Symbol=symbol,log=TRUE)
+}
+
+
