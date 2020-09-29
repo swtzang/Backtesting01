@@ -6,7 +6,7 @@ The purpose of this project is to use quantstrat and TTR packages to do backtest
 
 ## 3. https://gist.github.com/geoquant/3118985
 
-## 4. # https://bookdown.org/kochiuyu/Technical-Analysis-with-R/blotter-package.html
+## 4. https://bookdown.org/kochiuyu/Technical-Analysis-with-R/blotter-package.html
 ###  Chiu Yu Ko, Technical analysis with R
 
 
