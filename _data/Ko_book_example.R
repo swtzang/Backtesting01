@@ -436,5 +436,23 @@ for(symbol in symbols) {
   chart.Posn(Portfolio=portfolio.st,
              Symbol=symbol,log=TRUE)
 }
-
-
+#
+ob <- getOrderBook(portfolio.st)
+class(ob)
+names(ob)
+names(ob$SMA)
+names(ob$SMA$IBM)
+#
+ob$SMA$IBM[, 1:5]
+#
+ob$SMA$IBM[, 6:11]
+#
+t(perTradeStats(portfolio.st))
+# out <- perTradeStats(qs.strategy)
+# write.csv(out, 'perTradeStats.csv')
+ob$SMA$MSFT[, 1:5]
+ob$SMA$MSFT[, 6:11]
+mktdata['2012-9/2012-12']
+names(mktdata)
+rets <- PortfReturns(Account = account.st)
+rets$MSFT.DailyEqPL
